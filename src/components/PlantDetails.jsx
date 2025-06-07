@@ -1,10 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../store/cartSlice';
 
 const PlantDetails = ({ plant, onBack }) => {
+  const dispatch = useDispatch();
   const [selectedSize, setSelectedSize] = useState('small');
   const [selectedColor, setSelectedColor] = useState(plant.potColors[0]);
   const [currentPrice, setCurrentPrice] = useState(plant.basePrice);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     // Calculate price based on size
@@ -16,6 +20,26 @@ const PlantDetails = ({ plant, onBack }) => {
     const newPrice = plant.basePrice * sizeMultiplier[selectedSize];
     setCurrentPrice(newPrice);
   }, [selectedSize, plant.basePrice]);
+
+  const handleAddToCart = () => {
+    setIsAdding(true);
+    
+    const cartItem = {
+      id: plant.id,
+      name: plant.name,
+      image: plant.image,
+      price: currentPrice,
+      selectedSize,
+      selectedColor,
+    };
+    
+    dispatch(addToCart(cartItem));
+    
+    // Animation feedback
+    setTimeout(() => {
+      setIsAdding(false);
+    }, 600);
+  };
 
   return (
     <div className="plant-details">
@@ -79,8 +103,12 @@ const PlantDetails = ({ plant, onBack }) => {
                 <span className="price-label">Price: </span>
                 <span className="price-value">${currentPrice.toFixed(2)}</span>
               </div>
-              <button className="add-to-cart-btn">
-                Add to Cart
+              <button 
+                className={`add-to-cart-btn ${isAdding ? 'adding' : ''}`}
+                onClick={handleAddToCart}
+                disabled={isAdding}
+              >
+                {isAdding ? 'Adding...' : 'Add to Cart'}
               </button>
             </div>
           </div>
