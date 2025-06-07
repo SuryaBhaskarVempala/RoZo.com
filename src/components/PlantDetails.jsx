@@ -11,7 +11,6 @@ const PlantDetails = ({ plant, onBack }) => {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    // Calculate price based on size
     const sizeMultiplier = {
       small: 1,
       medium: 1.5,
@@ -35,11 +34,12 @@ const PlantDetails = ({ plant, onBack }) => {
     
     dispatch(addToCart(cartItem));
     
-    // Animation feedback
     setTimeout(() => {
       setIsAdding(false);
     }, 600);
   };
+
+  const currentSizeInfo = plant.sizeInfo[selectedSize];
 
   return (
     <div className="plant-details">
@@ -68,7 +68,7 @@ const PlantDetails = ({ plant, onBack }) => {
             
             <div className="customization">
               <div className="size-selection">
-                <h3>Pot Size</h3>
+                <h3>Pot & Plant Size</h3>
                 <div className="size-options">
                   {['small', 'medium', 'large'].map((size) => (
                     <button
@@ -76,10 +76,21 @@ const PlantDetails = ({ plant, onBack }) => {
                       className={`size-btn ${selectedSize === size ? 'active' : ''}`}
                       onClick={() => setSelectedSize(size)}
                     >
-                      {size.charAt(0).toUpperCase() + size.slice(1)}
+                      <div className="size-label">
+                        {size.charAt(0).toUpperCase() + size.slice(1)}
+                      </div>
+                      <div className="size-details">
+                        <small>Pot: {plant.sizeInfo[size].potSize}</small>
+                        <small>Plant: {plant.sizeInfo[size].plantHeight}</small>
+                      </div>
                     </button>
                   ))}
                 </div>
+                {currentSizeInfo && (
+                  <div className="size-description">
+                    <p>{currentSizeInfo.description}</p>
+                  </div>
+                )}
               </div>
               
               <div className="color-selection">
@@ -108,7 +119,7 @@ const PlantDetails = ({ plant, onBack }) => {
                 onClick={handleAddToCart}
                 disabled={isAdding}
               >
-                {isAdding ? 'Adding...' : 'Add to Cart'}
+                {isAdding ? 'Adding to Cart... 🌱' : 'Add to Cart 🛒'}
               </button>
             </div>
           </div>
