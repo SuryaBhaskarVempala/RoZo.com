@@ -3,13 +3,21 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const PlantCard = ({ plant, onSelect }) => {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  // Generate random index between 0 and 4
+  const randomIndex = Math.floor(Math.random() * 5);
+
+  // Use image at random index, fallback to 0 if not available
+  const imageUrl = plant.image[randomIndex] || plant.image[0];
+
+
   return (
     <div className="plant-card" onClick={() => {
       navigate(`/plantDetails/${plant.id}`);
     }}>
       <div className="plant-image-container">
-        <img src={plant.image} alt={plant.name} className="plant-image" />
+        <img src={imageUrl} alt={plant.name} className="plant-image" />
         <div className="plant-overlay">
           <span className="view-details">View Details</span>
         </div>

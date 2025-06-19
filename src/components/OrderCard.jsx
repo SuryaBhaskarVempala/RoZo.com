@@ -107,7 +107,7 @@ const OrderCard = ({ order }) => {
                   </div>
                 </div>
                 <div className="item-total">
-                &#8377;{(item.quantity * item.price).toFixed(2)}
+                  &#8377;{(item.quantity * item.price).toFixed(2)}
                 </div>
               </div>
             ))}
@@ -117,7 +117,18 @@ const OrderCard = ({ order }) => {
             <div className="address">
               <div>{order.deliveryAddress}</div>
             </div>
+          </div><br></br>
+          <div className="shipping-info">
+            <h5>Estimated Delivery Date</h5>
+            <div className="address">
+              <div>{new Date(order.deliveryDate).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+              })}</div>
+            </div>
           </div>
+
         </div>
       )}
 
