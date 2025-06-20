@@ -1,13 +1,11 @@
+import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useContext, useState } from "react";
 import { AuthContext } from "../store/AuthContext";
-import { useEffect } from "react";
-
 
 function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user,setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const { cartItems = [], totalAmount = 0 } = location.state || {};
 
   const [step, setStep] = useState(1);
@@ -15,19 +13,13 @@ function Checkout() {
   const [address, setAddress] = useState({
     name: "",
     sparePhone: "",
-    phone:user?.phone || '6304946937',
+    phone: user?.phone,
     street: "",
     city: "",
     state: "",
     pincode: "",
   });
   const [errors, setErrors] = useState({});
-
-  const handleAddressChange = (e) => {
-    const { name, value } = e.target;
-    setAddress({ ...address, [name]: value });
-    setErrors({ ...errors, [name]: "" });
-  };
 
   const validateAddress = () => {
     const errs = {};
@@ -45,22 +37,112 @@ function Checkout() {
     if (validateAddress()) setStep(2);
   };
 
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setAddress({ ...address, [name]: value });
+    setErrors({ ...errors, [name]: "" });
+  };
 
-  useEffect(() => {
-    if (!user || !cartItems || cartItems.length === 0 || totalAmount === 0) {
-      navigate("/login");
-    }
-  }, [user, cartItems, totalAmount, navigate]);
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
-
-
-  const handlePayment = async () => {
-    if (!upiChecked) {
-      alert("Please Fill All The Fileds");
+  const paymentHandler = async () => {
+    const isLoaded = await loadRazorpayScript();
+    if (!isLoaded) {
+      alert("Failed to load Razorpay SDK. Check your connection.");
       return;
     }
 
+    const response = await fetch(`${import.meta.env.VITE_API_URL_NONAPI}/order`, {
+      method: "POST",
+      body: JSON.stringify({
+        amount: totalAmount * 100,
+        currency: "INR",
+        receipt: "receipt#1",
+        items: cartItems.map((item) => ({
+          productId: item.productId,
+          selectedSize: item.selectedSize,
+          selectedColor: item.selectedColor,
+          quantity: item.quantity,
+        })),
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
+    // 🔴 If stock failure or server error
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (errorData.failures && Array.isArray(errorData.failures)) {
+        const messages = errorData.failures
+          .map((fail) => `• ${fail.productId}: ${fail.message}`)
+          .join("\n");
+        alert(`❌ Stock issues detected:\n\n${messages}`);
+      } else {
+        alert(`❌ ${errorData.message || "Failed to initiate order."}`);
+      }
+      return;
+    }
+
+    const order = await response.json();
+
+    const options = {
+      key: 'rzp_test_3KJDNoUaJnzWVM',
+      amount: order.amount,
+      currency: "INR",
+      name: "RoZo",
+      description: "Test Transaction",
+      image: "https://w1.pngwing.com/pngs/523/470/png-transparent-green-leaf-logo-plants-garden-seedling-flower-garden-symbol-nursery-gardening.png",
+      order_id: order.id,
+      handler: async function (response) {
+        const validateRes = await fetch(`${import.meta.env.VITE_API_URL_NONAPI}/order/validate`, {
+          method: "POST",
+          body: JSON.stringify(response),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const result = await validateRes.json();
+
+        if (result.msg === "success") {
+          await placeOrder(result.orderId, result.paymentId);
+        } else {
+          alert("❌ Payment verification failed");
+        }
+      },
+      prefill: {
+        name: address.name,
+        email: "RoZo@example.com",
+        contact: address.phone,
+      },
+      notes: {
+        address: `${address.street}, ${address.city}, ${address.state} - ${address.pincode}`,
+      },
+      theme: {
+        color: "#3399cc",
+      },
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    rzp1.open();
+
+    rzp1.on("payment.failed", function (response) {
+      alert("❌ Payment Failed: " + response.error.description);
+      console.error(response.error);
+    });
+  };
+
+
+  const placeOrder = async (orderId, paymentId) => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
       const response = await fetch(`${apiUrl}/orders/place-order`, {
@@ -68,31 +150,32 @@ function Checkout() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: address.name,
-          phone: user.phone,
+          phone: address.phone,
           sparePhone: address.sparePhone,
-          items: cartItems.map(item => ({
+          items: cartItems.map((item) => ({
             productId: item.productId,
             name: item.name,
             quantity: item.quantity,
             price: item.price,
             image: item.image,
             selectedSize: item.selectedSize,
-            selectedColor: item.selectedColor
+            selectedColor: item.selectedColor,
           })),
           price: totalAmount,
-          user: user._id, // 🔁 Replace this with actual logged-in user ID
+          user: user._id,
           deliveryAddress: `${address.street}, ${address.city}, ${address.state} - ${address.pincode}`,
           paymentMethod: "via upi",
-          paymentStatus: "Paid"
+          paymentStatus: "Paid",
+          razorpayOrderId: orderId,
+          razorpayPaymentId: paymentId,
         }),
       });
 
       const data = await response.json();
-
       if (response.ok) {
         alert("✅ Order placed successfully!");
         setUser(data.userData);
-        navigate('/Account');
+        navigate("/Account");
       } else {
         alert(`❌ Failed to place order: ${data.message || "Unknown error"}`);
       }
@@ -102,6 +185,19 @@ function Checkout() {
     }
   };
 
+  const handlePayment = async () => {
+    if (!upiChecked) {
+      alert("Please check the UPI box to continue.");
+      return;
+    }
+    await paymentHandler();
+  };
+
+  useEffect(() => {
+    if (!user || !cartItems || cartItems.length === 0 || totalAmount === 0) {
+      navigate("/login");
+    }
+  }, [user, cartItems, totalAmount, navigate]);
 
   return (
     <div className="checkout-wrapper">

@@ -231,6 +231,7 @@ const Cart = ({ isOpen, onClose }) => {
                     return;
                   }
 
+                  console.log(filteredTotal);
                   navigate('/checkout', {
                     state: {
                       cartItems: filteredItems,

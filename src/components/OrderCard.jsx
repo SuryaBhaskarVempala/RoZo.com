@@ -105,6 +105,9 @@ const OrderCard = ({ order }) => {
                   <div className="item-details">
                     Quantity: {item.quantity} × &#8377;{item.price.toFixed(2)}
                   </div>
+                  <div className="item-details">
+                    Size: {item.selectedSize} × Color : {item.selectedColor}
+                  </div>
                 </div>
                 <div className="item-total">
                   &#8377;{(item.quantity * item.price).toFixed(2)}
