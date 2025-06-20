@@ -260,6 +260,17 @@ function Checkout() {
               ))}
             </div>
 
+
+            <h3 className="summary-subheading">Note : </h3>
+            <div className="cart-card-container">
+              <p className="cart-card-note">
+                Please ensure the address is correct. We will not be able to change it once the order is placed.
+              </p>
+              <p>
+                Don't press the back button or refresh the page during payment, wait until you get response !
+              </p>
+            </div>
+
             <p className="summary-total">Total: ₹{totalAmount}</p>
 
             <div className="upi-checkbox">
