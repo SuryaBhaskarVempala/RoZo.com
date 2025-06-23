@@ -16,10 +16,6 @@ async function register(userData) {
     }
 
     localStorage.setItem('token', data.token);
-    toast({
-        title: 'Error',
-        description: '✅ Registration successful! You can now log in.',
-    });
     return data;
 }
 
@@ -90,14 +86,17 @@ const Signup = () => {
         if (Object.keys(newErrors).length === 0) {
             try {
                 await register(formData);
+                toast({
+                    title: 'Error',
+                    description: '✅ Registration successful!',
+                });
+                window.location.href = '/';
             } catch (err) {
                 setErrors({ submit: err.message });
             }
         } else {
             setErrors(newErrors);
-        }
-
-        window.location.href = '/';
+        }  
     };
 
     return (
