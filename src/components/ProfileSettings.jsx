@@ -50,6 +50,7 @@ const ProfileSettings = () => {
 
       setUser(res.data.user); // <- update global context user here
       setIsEditing(false);
+      
       toast({
         title: 'Success',
         description: 'Name updated successfully!',

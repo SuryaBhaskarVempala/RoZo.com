@@ -58,7 +58,7 @@ function Checkout() {
     const isLoaded = await loadRazorpayScript();
     if (!isLoaded) {
       toast({
-        title: 'Error',
+        title: 'Razorpay Error',
         description: 'Failed to load Razorpay SDK. Check your connection.',
       });
       return;
@@ -90,7 +90,7 @@ function Checkout() {
           .map((fail) => `• ${fail.productId}: ${fail.message}`)
           .join("\n");
         toast({
-          title: 'Error',
+          title: 'Stoack Error',
           description: `❌ Stock issues detected:\n\n${messages}.`,
         });
 
@@ -128,7 +128,7 @@ function Checkout() {
           await placeOrder(result.orderId, result.paymentId);
         } else {
           toast({
-            title: 'Error',
+            title: 'Payment Verification Error',
             description: "❌ Payment verification failed",
           });
         }
@@ -151,7 +151,7 @@ function Checkout() {
 
     rzp1.on("payment.failed", function (response) {
       toast({
-        title: 'Error',
+        title: 'Payment Error',
         description: `❌ Payment Failed:${response.error.description}`,
       });
       console.error(response.error);
@@ -191,7 +191,7 @@ function Checkout() {
       const data = await response.json();
       if (response.ok) {
         toast({
-          title: 'Error',
+          title: 'Order Placed',
           description: '✅ Order placed successfully!',
         });
         setUser(data.userData);
