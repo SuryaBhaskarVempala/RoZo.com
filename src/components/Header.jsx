@@ -16,7 +16,7 @@ const Header = () => {
 
   const scrollToSection = (sectionId) => {
     setActiveSection(sectionId);
-    setIsMenuOpen(!isMenuOpen);
+    setIsMenuOpen(false);
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
