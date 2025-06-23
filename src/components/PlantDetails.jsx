@@ -37,7 +37,10 @@ const PlantDetails = () => {
         .then(response => response.json())
         .then(data => {
           if (!data?.plant) {
-            alert('Plant not found');
+            toast({
+              title: 'Error',
+              description: '❌ Plant not found',
+            });
             navigate('/');
             return;
           }
@@ -66,7 +69,10 @@ const PlantDetails = () => {
         })
         .catch(error => {
           console.error('Error fetching plant:', error);
-          alert('Failed to load plant details');
+          toast({
+            title: 'Error',
+            description: '❌ Failed to load plant details',
+          });
         })
         .finally(() => {
           setPlantDetailsLoading(false);

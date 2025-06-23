@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../store/AuthContext";
+import { toast } from './ui/use-toast';
 
 function Checkout() {
   const location = useLocation();
@@ -56,7 +57,10 @@ function Checkout() {
   const paymentHandler = async () => {
     const isLoaded = await loadRazorpayScript();
     if (!isLoaded) {
-      alert("Failed to load Razorpay SDK. Check your connection.");
+      toast({
+        title: 'Error',
+        description: 'Failed to load Razorpay SDK. Check your connection.',
+      });
       return;
     }
 
@@ -85,9 +89,16 @@ function Checkout() {
         const messages = errorData.failures
           .map((fail) => `• ${fail.productId}: ${fail.message}`)
           .join("\n");
-        alert(`❌ Stock issues detected:\n\n${messages}`);
+        toast({
+          title: 'Error',
+          description: `❌ Stock issues detected:\n\n${messages}.`,
+        });
+
       } else {
-        alert(`❌ ${errorData.message || "Failed to initiate order."}`);
+        toast({
+          title: 'Error',
+          description: `❌ ${errorData.message || "Failed to initiate order."}`,
+        });
       }
       return;
     }
@@ -116,7 +127,10 @@ function Checkout() {
         if (result.msg === "success") {
           await placeOrder(result.orderId, result.paymentId);
         } else {
-          alert("❌ Payment verification failed");
+          toast({
+            title: 'Error',
+            description: "❌ Payment verification failed",
+          });
         }
       },
       prefill: {
@@ -136,7 +150,10 @@ function Checkout() {
     rzp1.open();
 
     rzp1.on("payment.failed", function (response) {
-      alert("❌ Payment Failed: " + response.error.description);
+      toast({
+        title: 'Error',
+        description: `❌ Payment Failed:${response.error.description}`,
+      });
       console.error(response.error);
     });
   };
@@ -173,21 +190,33 @@ function Checkout() {
 
       const data = await response.json();
       if (response.ok) {
-        alert("✅ Order placed successfully!");
+        toast({
+          title: 'Error',
+          description: '✅ Order placed successfully!',
+        });
         setUser(data.userData);
         navigate("/Account");
       } else {
-        alert(`❌ Failed to place order: ${data.message || "Unknown error"}`);
+        toast({
+          title: 'Error',
+          description: `❌ Failed to place order: ${data.message || "Unknown error"}`,
+        });
       }
     } catch (error) {
       console.error("Error placing order:", error);
-      alert("❌ Something went wrong. Please try again.");
+      toast({
+        title: 'Error',
+        description: "❌ Something went wrong. Please try again.",
+      });
     }
   };
 
   const handlePayment = async () => {
     if (!upiChecked) {
-      alert("Please check the UPI box to continue.");
+      toast({
+        title: 'Error',
+        description: "Please check the UPI box to continue.",
+      });
       return;
     }
     await paymentHandler();

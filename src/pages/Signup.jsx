@@ -16,7 +16,10 @@ async function register(userData) {
     }
 
     localStorage.setItem('token', data.token);
-    alert('Registration successful! You can now log in.');
+    toast({
+        title: 'Error',
+        description: '✅ Registration successful! You can now log in.',
+    });
     return data;
 }
 
