@@ -24,7 +24,7 @@ const Header = () => {
                 <div className="container">
                     <div className="header-content">
                         <div className="logo">
-                            {/* <div className="logo-icon">🌿</div> */}
+                             <div className="logo-icon">🌿</div>
                             <h1 className="logo-text" style={{ cursor: 'pointer' }} onClick={() => {
                                 window.location.href = '/';
                             }}>RoZo</h1>
