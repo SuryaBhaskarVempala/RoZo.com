@@ -90,13 +90,14 @@ const Signup = () => {
         if (Object.keys(newErrors).length === 0) {
             try {
                 await register(formData);
-                navigate('/');
             } catch (err) {
                 setErrors({ submit: err.message });
             }
         } else {
             setErrors(newErrors);
         }
+
+        window.location.href = '/';
     };
 
     return (
