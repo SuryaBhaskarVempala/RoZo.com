@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Signup.css';
+import { toast } from '../components/ui/toast';
 
 async function register(userData) {
     const apiUrl = import.meta.env.VITE_API_URL;
