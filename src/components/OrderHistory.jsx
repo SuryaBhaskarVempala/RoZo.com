@@ -1,30 +1,28 @@
 import React, { useEffect, useState, useContext } from 'react';
 import OrderCard from './OrderCard';
 import axios from 'axios';
-import { AuthContext } from '../store/AuthContext'; // adjust the path if needed
+import { AuthContext } from '../store/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const OrderHistory = () => {
   const { user } = useContext(AuthContext);
-  const { navigate } = useNavigate();
-  const [orders, setOrders] = useState(user.orders);
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        console.log(user.orders);
         if (!user || !user.orders || user.orders.length === 0) {
           navigate('/login');
           return;
         }
 
         const ids = user.orders.join(',');
-        console.log(ids);
         const apiUrl = import.meta.env.VITE_API_URL;
         const res = await axios.get(`${apiUrl}/orders?ids=${ids}`);
-        setOrders(res.data); // Make sure backend returns array of full order objects
+        setOrders(res.data); // Expect full order objects with trackingSteps
       } catch (error) {
         console.error('Failed to fetch orders:', error);
         setOrders([]);
@@ -34,27 +32,12 @@ const OrderHistory = () => {
     };
 
     fetchOrders();
-  }, [user]);
-
-  const handleCancelOrder = async (orderId) => {
-    try {
-      const res = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${orderId}/cancel`);
-      if (res.status === 200) {
-        setOrders((prevOrders) =>
-          prevOrders.map((order) =>
-            order._id === orderId
-              ? { ...order, status: 'cancelled', canCancel: false }
-              : order
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Failed to cancel order:', error);
-    }
-  };
+  }, [user, navigate]);
 
   const filteredOrders = orders.filter((order) => {
-    return filterStatus === 'all' || order.status === filterStatus;
+    if (filterStatus === 'all') return true;
+    const lastStep = [...order.trackingSteps].reverse().find((s) => s.completed);
+    return lastStep?.step.toLowerCase() === filterStatus;
   });
 
   return (
@@ -81,10 +64,9 @@ const OrderHistory = () => {
       <div className="orders-list">
         {loading ? (
           [...Array(3)].map((_, index) => (
-            <div className="order-card" key={index}>
+            <div className="order-card skeleton" key={index}>
               <div className="order-header">
-                <div className="order-info">
-                </div>
+                <div className="order-info" />
               </div>
             </div>
           ))
@@ -99,7 +81,6 @@ const OrderHistory = () => {
             <OrderCard
               key={order._id}
               order={order}
-            // onCancelOrder={handleCancelOrder}
             />
           ))
         )}
