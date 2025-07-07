@@ -22,7 +22,7 @@ const OrderHistory = () => {
         const ids = user.orders.join(',');
         const apiUrl = import.meta.env.VITE_API_URL;
         const res = await axios.get(`${apiUrl}/orders?ids=${ids}`);
-        setOrders(res.data); // Expect full order objects with trackingSteps
+        setOrders(res.data);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
         setOrders([]);
@@ -34,10 +34,16 @@ const OrderHistory = () => {
     fetchOrders();
   }, [user, navigate]);
 
+  const getLastCompletedStep = (trackingSteps = []) => {
+    return [...trackingSteps]
+      .reverse()
+      .find(step => step.completed)?.step;
+  };
+
   const filteredOrders = orders.filter((order) => {
     if (filterStatus === 'all') return true;
-    const lastStep = [...order.trackingSteps].reverse().find((s) => s.completed);
-    return lastStep?.step.toLowerCase() === filterStatus;
+    const lastStep = getLastCompletedStep(order.trackingSteps);
+    return lastStep === filterStatus;
   });
 
   return (
@@ -55,7 +61,7 @@ const OrderHistory = () => {
               className={`filter-btn ${filterStatus === status ? 'active' : ''}`}
               onClick={() => setFilterStatus(status)}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {status}
             </button>
           ))}
         </div>

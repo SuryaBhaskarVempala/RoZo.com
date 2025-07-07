@@ -5,26 +5,11 @@ const OrderCard = ({ order }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showTracking, setShowTracking] = useState(false);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return '#eca355';
-      case 'confirmed': return '#2196f3';
-      case 'shipped': return '#9c27b0';
-      case 'delivered': return '#4caf50';
-      case 'cancelled': return '#f44336';
-      default: return '#757575';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'pending': return 'Order Pending';
-      case 'confirmed': return 'Order Confirmed';
-      case 'shipped': return 'Shipped';
-      case 'delivered': return 'Delivered';
-      case 'cancelled': return 'Cancelled';
-      default: return status;
-    }
+  // ✅ Get latest completed step to theme the card
+  const getLastCompletedStep = () => {
+    return [...(order.trackingSteps || [])]
+      .reverse()
+      .find(step => step.completed)?.step?.toLowerCase() || 'pending';
   };
 
   const handleCancelOrder = () => {
@@ -36,8 +21,6 @@ const OrderCard = ({ order }) => {
       });
     }
   };
-
-
 
   const handleTrackOrder = () => {
     if (!order.trackingNumber) {
@@ -51,7 +34,7 @@ const OrderCard = ({ order }) => {
   };
 
   return (
-    <div className="order-card">
+    <div className={`order-card status-${getLastCompletedStep().replace(/\s+/g, '-')}`}>
       <div className="order-header">
         <div className="order-info">
           <div className="order-number">#{order._id}</div>
@@ -59,8 +42,8 @@ const OrderCard = ({ order }) => {
             Placed on {new Date(order.createdAt).toLocaleDateString()}
           </div>
         </div>
-        <div className="order-status" style={{ backgroundColor: getStatusColor(order.status) }}>
-          {getStatusText(order?.status)}
+        <div className="order-status">
+          {getLastCompletedStep().replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
         </div>
         <div className="order-total">&#8377;{order.price}</div>
       </div>
@@ -106,7 +89,7 @@ const OrderCard = ({ order }) => {
                     Quantity: {item.quantity} × &#8377;{item.price.toFixed(2)}
                   </div>
                   <div className="item-details">
-                    Size: {item.selectedSize} × Color : {item.selectedColor}
+                    Size: {item.selectedSize} × Color: {item.selectedColor}
                   </div>
                 </div>
                 <div className="item-total">
@@ -117,21 +100,19 @@ const OrderCard = ({ order }) => {
           </div>
           <div className="shipping-info">
             <h5>Shipping Address</h5>
-            <div className="address">
-              <div>{order.deliveryAddress}</div>
-            </div>
-          </div><br></br>
+            <div className="address">{order.deliveryAddress}</div>
+          </div>
+          <br />
           <div className="shipping-info">
             <h5>Estimated Delivery Date</h5>
             <div className="address">
-              <div>{new Date(order.deliveryDate).toLocaleDateString('en-IN', {
+              {new Date(order.deliveryDate).toLocaleDateString('en-IN', {
                 day: '2-digit',
                 month: 'long',
-                year: 'numeric'
-              })}</div>
+                year: 'numeric',
+              })}
             </div>
           </div>
-
         </div>
       )}
 
@@ -141,7 +122,7 @@ const OrderCard = ({ order }) => {
           <div className="tracking-number">
             Tracking Number: <span>{order.trackingNumber}</span>
           </div>
-          {order.estimatedDelivery && (
+          {order.deliveryDate && (
             <div className="estimated-delivery">
               Estimated Delivery: {new Date(order.deliveryDate).toLocaleDateString()}
             </div>
@@ -152,15 +133,14 @@ const OrderCard = ({ order }) => {
                 <div className="step-indicator"></div>
                 <div className="step-content">
                   <div className="step-title">{step.step}</div>
-                  {step.date ? (
+                  {step.date && (
                     <div className="step-date">
                       {new Date(step.date).toLocaleDateString()}
                     </div>
-                  ) : null}
+                  )}
                 </div>
               </div>
             ))}
-
           </div>
         </div>
       )}
