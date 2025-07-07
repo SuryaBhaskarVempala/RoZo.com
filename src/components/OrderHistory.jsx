@@ -34,6 +34,11 @@ const OrderHistory = () => {
     fetchOrders();
   }, [user, navigate]);
 
+
+   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [filterStatus]);
+
   const getLastCompletedStep = (trackingSteps = []) => {
     return [...trackingSteps]
       .reverse()
@@ -55,7 +60,7 @@ const OrderHistory = () => {
 
       <div className="order-filters">
         <div className="status-filters">
-          {['all', 'Order Placed', 'Shipped', 'Delivered'].map((status) => (
+          {['All', 'Order Placed', 'Shipped', 'Delivered'].map((status) => (
             <button
               key={status}
               className={`filter-btn ${filterStatus === status ? 'active' : ''}`}

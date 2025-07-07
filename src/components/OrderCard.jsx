@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { toast } from './ui/use-toast';
 
-const OrderCard = ({ order, onCancelOrder }) => {
+const OrderCard = ({ order }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showTracking, setShowTracking] = useState(false);
 
-  // Determine last completed tracking step for theming
+  // ✅ Get latest completed tracking step from array
   const getLastCompletedStep = () => {
     return [...(order.trackingSteps || [])]
       .reverse()
-      .find(step => step.completed)?.step?.toLowerCase() || 'pending';
+      .find(step => step.completed)?.step || 'Pending';
   };
 
-  const cardThemeClass = `status-${getLastCompletedStep().replace(/\s+/g, '-')}`;
+  const getStatusColor = (step) => {
+    const stepLower = step.toLowerCase();
+    if (stepLower === 'order placed') return '#eca355';
+    if (stepLower === 'shipped') return '#9c27b0';
+    if (stepLower === 'delivered') return '#4caf50';
+    return '#757575';
+  };
 
   const handleCancelOrder = () => {
     if (window.confirm('Are you sure you want to cancel this order?')) {
@@ -35,8 +41,10 @@ const OrderCard = ({ order, onCancelOrder }) => {
     setShowTracking(!showTracking);
   };
 
+  const currentStep = getLastCompletedStep();
+
   return (
-    <div className={`order-card ${cardThemeClass}`}>
+    <div className="order-card">
       <div className="order-header">
         <div className="order-info">
           <div className="order-number">#{order._id}</div>
@@ -44,8 +52,8 @@ const OrderCard = ({ order, onCancelOrder }) => {
             Placed on {new Date(order.createdAt).toLocaleDateString()}
           </div>
         </div>
-        <div className="order-status">
-          {getLastCompletedStep().replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+        <div className="order-status" style={{ backgroundColor: getStatusColor(currentStep) }}>
+          {currentStep}
         </div>
         <div className="order-total">&#8377;{order.price}</div>
       </div>
@@ -91,7 +99,7 @@ const OrderCard = ({ order, onCancelOrder }) => {
                     Quantity: {item.quantity} × &#8377;{item.price.toFixed(2)}
                   </div>
                   <div className="item-details">
-                    Size: {item.selectedSize} × Color: {item.selectedColor}
+                    Size: {item.selectedSize} × Color : {item.selectedColor}
                   </div>
                 </div>
                 <div className="item-total">
@@ -111,7 +119,7 @@ const OrderCard = ({ order, onCancelOrder }) => {
               {new Date(order.deliveryDate).toLocaleDateString('en-IN', {
                 day: '2-digit',
                 month: 'long',
-                year: 'numeric',
+                year: 'numeric'
               })}
             </div>
           </div>
@@ -124,7 +132,7 @@ const OrderCard = ({ order, onCancelOrder }) => {
           <div className="tracking-number">
             Tracking Number: <span>{order.trackingNumber}</span>
           </div>
-          {order.deliveryDate && (
+          {order.estimatedDelivery && (
             <div className="estimated-delivery">
               Estimated Delivery: {new Date(order.deliveryDate).toLocaleDateString()}
             </div>
@@ -135,11 +143,11 @@ const OrderCard = ({ order, onCancelOrder }) => {
                 <div className="step-indicator"></div>
                 <div className="step-content">
                   <div className="step-title">{step.step}</div>
-                  {step.date && (
+                  {step.date ? (
                     <div className="step-date">
                       {new Date(step.date).toLocaleDateString()}
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             ))}

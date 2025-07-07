@@ -402,6 +402,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
+  margin-bottom: 10px;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -668,28 +669,6 @@
 .step-date {
   color: #64748b;
   font-size: 0.9rem;
-}
-
-/* 🔥 THEME BASED ON TRACKING STEP STATUS */
-
-.order-card.status-order-placed {
-  border-left: 6px solid #3b82f6;
-  background-color: #eff6ff;
-}
-
-.order-card.status-shipped {
-  border-left: 6px solid #9333ea;
-  background-color: #f5f3ff;
-}
-
-.order-card.status-delivered {
-  border-left: 6px solid #16a34a;
-  background-color: #ecfdf5;
-}
-
-.order-card.status-pending {
-  border-left: 6px solid #d1d5db;
-  background-color: #f9fafb;
 }
 
 
@@ -1111,4 +1090,3 @@ input:checked+.slider:before {
     transform: rotate(360deg);
   }
 }
-
