@@ -49,7 +49,7 @@ const OrderHistory = () => {
 
       <div className="order-filters">
         <div className="status-filters">
-          {['all', 'pending', 'shipped', 'delivered'].map((status) => (
+          {['all', 'Order Placed', 'Shipped', 'Delivered'].map((status) => (
             <button
               key={status}
               className={`filter-btn ${filterStatus === status ? 'active' : ''}`}
