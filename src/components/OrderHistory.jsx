@@ -8,7 +8,7 @@ const OrderHistory = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('All');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,22 +34,21 @@ const OrderHistory = () => {
     fetchOrders();
   }, [user, navigate]);
 
-
-   useEffect(() => {
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [filterStatus]);
 
   const getLastCompletedStep = (trackingSteps = []) => {
-    return [...trackingSteps]
-      .reverse()
-      .find(step => step.completed)?.step;
+    return [...trackingSteps].reverse().find(step => step.completed)?.step;
   };
 
-  const filteredOrders = orders.filter((order) => {
-    if (filterStatus === 'all') return true;
-    const lastStep = getLastCompletedStep(order.trackingSteps);
-    return lastStep === filterStatus;
-  });
+  const filteredOrders =
+    filterStatus === 'All'
+      ? orders
+      : orders.filter((order) => {
+          const lastStep = getLastCompletedStep(order.trackingSteps);
+          return lastStep === filterStatus;
+        });
 
   return (
     <div className="order-history">
@@ -89,10 +88,7 @@ const OrderHistory = () => {
           </div>
         ) : (
           filteredOrders.map((order) => (
-            <OrderCard
-              key={order._id}
-              order={order}
-            />
+            <OrderCard key={order._id} order={order} />
           ))
         )}
       </div>
