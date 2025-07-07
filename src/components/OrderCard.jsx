@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { toast } from './ui/use-toast';
 
-const OrderCard = ({ order }) => {
+const OrderCard = ({ order, onCancelOrder }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showTracking, setShowTracking] = useState(false);
 
-  // ✅ Get latest completed step to theme the card
+  // Determine last completed tracking step for theming
   const getLastCompletedStep = () => {
     return [...(order.trackingSteps || [])]
       .reverse()
       .find(step => step.completed)?.step?.toLowerCase() || 'pending';
   };
+
+  const cardThemeClass = `status-${getLastCompletedStep().replace(/\s+/g, '-')}`;
 
   const handleCancelOrder = () => {
     if (window.confirm('Are you sure you want to cancel this order?')) {
@@ -34,7 +36,7 @@ const OrderCard = ({ order }) => {
   };
 
   return (
-    <div className={`order-card status-${getLastCompletedStep().replace(/\s+/g, '-')}`}>
+    <div className={`order-card ${cardThemeClass}`}>
       <div className="order-header">
         <div className="order-info">
           <div className="order-number">#{order._id}</div>
